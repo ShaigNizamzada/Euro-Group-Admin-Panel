@@ -365,7 +365,8 @@
                     }
                 }
 
-                .image-preview {
+                .image-preview,
+                .icon-preview {
                     position: relative;
                     margin-top: 12px;
                     border-radius: 8px;
@@ -381,7 +382,8 @@
                         border: 1px solid #e0e0e0;
                     }
 
-                    .remove-image {
+                    .remove-image,
+                    .remove-icon {
                         position: absolute;
                         top: 8px;
                         right: 8px;

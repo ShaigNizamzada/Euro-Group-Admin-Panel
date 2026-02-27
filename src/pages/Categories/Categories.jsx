@@ -10,23 +10,24 @@ const Categories = () => {
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-
   const [categories, setCategories] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [iconPreview, setIconPreview] = useState(null);
   const [formData, setFormData] = useState({
-    name_az: "",
-    name_ru: "",
+    name_en: "",
+    name_es: "",
     image: null,
+    icon: null,
   });
 
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/categories`,
+        `${import.meta.env.VITE_API_URL}/api/admin/categories`,
         { headers }
       );
       setCategories(response?.data?.data || response?.data || []);
@@ -37,14 +38,11 @@ const Categories = () => {
       setIsLoading(false);
     }
   };
-
-  // Fetch categories
   useEffect(() => {
     fetchCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Input change handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -53,7 +51,6 @@ const Categories = () => {
     }));
   };
 
-  // Image file handler
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -61,7 +58,6 @@ const Categories = () => {
         ...prev,
         image: file,
       }));
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -69,8 +65,20 @@ const Categories = () => {
       reader.readAsDataURL(file);
     }
   };
-
-  // Remove image
+  const handleIconChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        icon: file,
+      }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIconPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleRemoveImage = () => {
     setFormData((prev) => ({
       ...prev,
@@ -78,16 +86,23 @@ const Categories = () => {
     }));
     setImagePreview(null);
   };
-
-  // Modal close
+  const handleRemoveIcon = () => {
+    setFormData((prev) => ({
+      ...prev,
+      icon: null,
+    }));
+    setIconPreview(null);
+  };
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingCategory(null);
     setImagePreview(null);
+    setIconPreview(null);
     setFormData({
-      name_az: "",
-      name_ru: "",
+      name_en: "",
+      name_es: "",
       image: null,
+      icon: null,
     });
   };
 
@@ -95,10 +110,12 @@ const Categories = () => {
   const openAddModal = () => {
     setEditingCategory(null);
     setImagePreview(null);
+    setIconPreview(null);
     setFormData({
-      name_az: "",
-      name_ru: "",
+      name_en: "",
+      name_es: "",
       image: null,
+      icon: null,
     });
     setIsModalOpen(true);
   };
@@ -107,13 +124,14 @@ const Categories = () => {
   const openEditModal = (category) => {
     setEditingCategory(category);
     setFormData({
-      name_az: category?.name?.az || "",
-      name_ru: category?.name?.ru || "",
+      name_en: category?.name?.en || "",
+      name_es: category?.name?.es || "",
       image: null,
+      icon: null,
     });
     // Set existing image as preview
-    if (category?.imgSrc) {
-      setImagePreview(`${import.meta.env.VITE_API_URL}${category.imgSrc}`);
+    if (category?.image) {
+      setImagePreview(`${import.meta.env.VITE_API_URL}${category.image}`);
     } else {
       setImagePreview(null);
     }
@@ -128,10 +146,13 @@ const Categories = () => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name_az", formData.name_az);
-      formDataToSend.append("name_ru", formData.name_ru);
+      formDataToSend.append("name_en", formData.name_en);
+      formDataToSend.append("name_es", formData.name_es);
       if (formData.image) {
         formDataToSend.append("image", formData.image);
+      }
+      if (formData.icon) {
+        formDataToSend.append("icon", formData.icon);
       }
 
       const config = {
@@ -142,20 +163,18 @@ const Categories = () => {
       };
 
       if (isEditMode) {
-        await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/categories/${categoryId}`,
+        await axios.patch(
+          `${import.meta.env.VITE_API_URL}/api/admin/categories/${categoryId}`,
           formDataToSend,
           config
         );
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/categories`,
+          `${import.meta.env.VITE_API_URL}/api/admin/categories`,
           formDataToSend,
           config
         );
       }
-
-      // Refresh categories list
       await fetchCategories();
       handleModalClose();
     } catch (error) {
@@ -175,7 +194,7 @@ const Categories = () => {
     if (!window.confirm("Silməyə əminsiniz?")) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/categories/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/categories/${id}`,
         { headers }
       );
       setCategories((prev) => prev.filter((category) => category.id !== id));
@@ -204,8 +223,9 @@ const Categories = () => {
             <tr>
               <th>ID</th>
               <th>Şəkil</th>
-              <th>Ad (AZ)</th>
-              <th>Ad (RU)</th>
+              <th>Icon</th>
+              <th>Ad (En)</th>
+              <th>Ad (Es)</th>
               <th>Əməliyyatlar</th>
             </tr>
           </thead>
@@ -231,8 +251,19 @@ const Categories = () => {
                       <span className="no-image">Şəkil yoxdur</span>
                     )}
                   </td>
-                  <td>{category.name?.az || "-"}</td>
-                  <td>{category.name?.ru || "-"}</td>
+                  <td>
+                    {category.iconSrc ? (
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}${category.iconSrc}`}
+                        alt={category.name?.az || "Category"}
+                        className="category-icon"
+                      />
+                    ) : (
+                      <span className="no-icon">Icon yoxdur</span>
+                    )}
+                  </td>
+                  <td>{category.name?.en || "-"}</td>
+                  <td>{category.name?.es || "-"}</td>
                   <td>
                     <div className="d-flex gap-2">
                       <button
@@ -277,27 +308,27 @@ const Categories = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitCategory}>
               <div className="form-group">
-                <label htmlFor="name_az">Ad (Azərbaycan)</label>
+                <label htmlFor="name_en">Category name (English)</label>
                 <input
-                  id="name_az"
-                  name="name_az"
+                  id="name_en"
+                  name="name_en"
                   type="text"
-                  value={formData.name_az}
+                  value={formData.name_en}
                   onChange={handleInputChange}
-                  placeholder="Kateqoriya adı (AZ)"
+                  placeholder="Category name (EN)"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="name_ru">Ad (Русский)</label>
+                <label htmlFor="name_es">Category name (Spanish)</label>
                 <input
-                  id="name_ru"
-                  name="name_ru"
+                  id="name_es"
+                  name="name_es"
                   type="text"
-                  value={formData.name_ru}
+                  value={formData.name_es}
                   onChange={handleInputChange}
-                  placeholder="Название категории (RU)"
+                  placeholder="Category name (ES)"
                   required
                 />
               </div>
@@ -328,6 +359,39 @@ const Categories = () => {
                         type="button"
                         className="remove-image"
                         onClick={handleRemoveImage}
+                      >
+                        <i>✕</i>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Icon</label>
+                <div className="file-upload-wrapper">
+                  <input
+                    type="file"
+                    id="icon"
+                    name="icon"
+                    accept="image/*"
+                    onChange={handleIconChange}
+                    className="file-input"
+                  />
+                  <label htmlFor="icon" className="file-upload-label">
+                    <i className="upload-icon">📁</i>
+                    <span>
+                      {formData.icon
+                        ? formData.icon.name
+                        : "Şəkil seçin (klik edin)"}
+                    </span>
+                  </label>
+                  {iconPreview && (
+                    <div className="icon-preview">
+                      <img src={iconPreview} alt="Preview" />
+                      <button
+                        type="button"
+                        className="remove-icon"
+                        onClick={handleRemoveIcon}
                       >
                         <i>✕</i>
                       </button>
