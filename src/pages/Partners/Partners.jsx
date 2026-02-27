@@ -175,10 +175,9 @@ const Partners = () => {
       <div className="table-wrapper">
         <table className="partners-table">
           <thead>
-            <tr>
+            <tr >
               <th>ID</th>
               <th>Şəkil</th>
-
               <th>Əməliyyatlar</th>
             </tr>
           </thead>
