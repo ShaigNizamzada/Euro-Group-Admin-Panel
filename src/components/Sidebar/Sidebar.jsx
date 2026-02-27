@@ -1,0 +1,156 @@
+import React, { useContext, createContext } from "react";
+import BirsaytLogo from "../../assets/images/Logo.webp";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import "./_Sidebar.scss";
+import { toast } from "react-toastify";
+import axios from "axios";
+
+export const SidebarContext = createContext();
+export const useSidebar = () => useContext(SidebarContext);
+
+const Sidebar = () => {
+  const [cookies] = useCookies(["token"]);
+  const token = cookies?.token;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isOpen, toggleSidebar, isMobileOpen, toggleMobileSidebar } =
+    useSidebar();
+  const [, , removeCookie] = useCookies(["token"]);
+  const handleMenuItemClick = () => {
+    if (window.innerWidth <= 768 && isMobileOpen) {
+      toggleMobileSidebar();
+    }
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    axios.post(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+    ).then((res) => {
+      toast.success(res.data.message);
+      removeCookie("token", {
+        path: "/",
+        sameSite: "lax",
+        secure: import.meta.env.PROD || false,
+      });
+      navigate("/login");
+    }).catch((err) => {
+      toast.error(err.response.data.message);
+    });
+  };
+  return (
+    <div
+      className={`sidebar ${isOpen ? "open" : "closed"} ${isMobileOpen ? "mobile-open" : ""
+        }`}
+    >
+      <div className="sidebar-content">
+        <div className="top-side">
+          <i
+            className="fa-solid fa-bars text-dark desktop-toggle"
+            onClick={toggleSidebar}
+          ></i>
+
+          {(isOpen || isMobileOpen) && (
+            <>
+              <img
+                src={BirsaytLogo}
+                alt="Birsayt Logo"
+                className="birsayt-logo"
+                title="birsayt"
+                onClick={() => {
+                  navigate("/dashboard");
+                  handleMenuItemClick();
+                }}
+                style={{ cursor: "pointer" }}
+              />
+              <i
+                className="fa-solid text-dark fa-xmark mobile-close"
+                onClick={toggleMobileSidebar}
+              ></i>
+            </>
+          )}
+        </div>
+        <div className="sidebar-menu">
+          <ul>
+            <Link
+              to="/dashboard"
+              className="link"
+              onClick={handleMenuItemClick}
+            >
+              <li className={isActive("/dashboard") ? "active" : ""}>
+                <i className="fa-solid fa-table-columns"></i>{" "}
+                <span>Dashboard</span>
+              </li>
+            </Link>{" "}
+            <Link to="/partners" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/partners") ? "active" : ""}>
+                <i className="fa-solid fa-handshake"></i> <span>Partners</span>
+              </li>
+            </Link>{" "}
+            <Link to="/categories" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/categories") ? "active" : ""}>
+                <i className="fa-solid fa-tags"></i> <span>Categories</span>
+              </li>
+            </Link>{" "}
+            <Link to="/brands" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/brands") ? "active" : ""}>
+                <i className="fa-solid fa-industry"></i> <span>Brands</span>
+              </li>
+            </Link>{" "}
+            <Link to="/products" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/products") ? "active" : ""}>
+                <i className="fa-solid fa-box"></i>
+                <span>Products</span>
+              </li>
+            </Link>{" "}
+            <Link to="/orders" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/orders") ? "active" : ""}>
+                <i className="fa-solid fa-shopping-cart"></i> <span>Orders</span>
+              </li>
+            </Link>{" "}
+            <Link to="/contacts" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/contacts") ? "active" : ""}>
+                <i className="fa-solid fa-envelope"></i> <span>Contacts</span>
+              </li>
+            </Link>{" "}
+            <Link to="/users" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/users") ? "active" : ""}>
+                <i className="fa-solid fa-users"></i> <span>Users</span>
+              </li>
+            </Link>{" "}
+            <Link to="/settings" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/settings") ? "active" : ""}>
+                <i className="fa-solid fa-gear"></i> <span>Settings</span>
+              </li>
+            </Link>
+          </ul>
+        </div>
+        <div className="sidebar-footer">
+          <div
+            className="link"
+            onClick={handleLogout}
+            style={{ cursor: "pointer" }}
+          >
+            <li>
+              <i className="fas fa-sign-out-alt"></i>
+              <span>Çıxış</span>
+            </li>
+          </div>
+        </div>
+      </div>
+      <div
+        className="mobile-sidebar-overlay"
+        onClick={toggleMobileSidebar}
+      ></div>
+    </div>
+  );
+};
+
+export default Sidebar;
