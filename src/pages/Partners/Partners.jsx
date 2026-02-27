@@ -138,15 +138,15 @@ const Partners = () => {
         error
       );
       alert(
-        `Partner ${isEditMode ? "yenilənmədi" : "əlavə edilmədi"
-        }. Xəta baş verdi.`
+        `Partner ${isEditMode ? "updated" : "created"
+        }. Error occurred.`
       );
     }
   };
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm("Silməyə əminsiniz?")) return;
+    if (!window.confirm("Are you sure you want to delete this partner?")) return;
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/partners/${id}`,
@@ -155,7 +155,7 @@ const Partners = () => {
       setPartners((prev) => prev.filter((partner) => partner.id !== id));
     } catch (error) {
       console.error("Failed to delete partner:", error);
-      alert("Partner silinmədi. Xəta baş verdi.");
+      alert("Partner not deleted. Error occurred.");
     }
   };
 
@@ -163,11 +163,11 @@ const Partners = () => {
     <div className="partners-page-section">
       <div className="top-section">
         <div className="title-section">
-          <h1>Partnerlər</h1>
+          <h1>Partners</h1>
         </div>
         <div className="button-section">
           <button className="addition-button" onClick={openAddModal}>
-            + Əlavə et
+            + Add
           </button>
         </div>
       </div>
@@ -177,8 +177,8 @@ const Partners = () => {
           <thead>
             <tr >
               <th>ID</th>
-              <th>Şəkil</th>
-              <th>Əməliyyatlar</th>
+              <th>Image</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -200,7 +200,7 @@ const Partners = () => {
                         className="partner-image"
                       />
                     ) : (
-                      <span className="no-image">Şəkil yoxdur</span>
+                      <span className="no-image">Image not found</span>
                     )}
                   </td>
                   <td>
@@ -209,13 +209,13 @@ const Partners = () => {
                         className="btn btn-outline-dark"
                         onClick={() => openEditModal(partner)}
                       >
-                        Redaktə et
+                        Edit
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={() => handleDelete(partner.id)}
                       >
-                        Sil
+                        Delete
                       </button>
                     </div>
                   </td>
@@ -224,7 +224,7 @@ const Partners = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="no-data-cell">
-                  Partner tapılmadı
+                  Partner not found
                 </td>
               </tr>
             )}
@@ -238,8 +238,8 @@ const Partners = () => {
             <div className="modal-header">
               <h2>
                 {editingPartner
-                  ? "Partnerni Dəyişdir"
-                  : "Yeni Partner"}
+                  ? "Edit Partner"
+                  : "New Partner"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -247,7 +247,7 @@ const Partners = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitPartner}>
               <div className="form-group">
-                <label>Şəkil</label>
+                <label>Image</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -261,7 +261,7 @@ const Partners = () => {
                     <span>
                       {formData.logo
                         ? formData.logo.name
-                        : "Şəkil seçin (klik edin)"}
+                        : "Image select (click)"}
                     </span>
                   </label>
                   {imagePreview && (
@@ -281,10 +281,10 @@ const Partners = () => {
 
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
-                  İmtina
+                  Cancel
                 </button>
                 <button type="submit" className="primary">
-                  {editingPartner ? "Dəyişdir" : "Əlavə et"}
+                  {editingPartner ? "Edit" : "Add"}
                 </button>
               </div>
             </form>

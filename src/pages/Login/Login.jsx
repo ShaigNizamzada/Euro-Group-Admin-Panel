@@ -72,7 +72,7 @@ const Login = () => {
       })
       .catch((err) => {
         toast.error(
-          err.response?.data?.message || "Yanlış email və ya şifrə"
+          err.response?.data?.message || "Invalid email or password"
         );
       });
   };
@@ -92,33 +92,33 @@ const Login = () => {
       <div className="login-page-container">
         <section className="top-section">
           <img src={BirsaytLogo} alt="Birsayt Logo" className="birsayt-logo" />
-          <h1>Xoş gəlmisiniz! 👋</h1>
+          <h1>Welcome! 👋</h1>
         </section>
         <section className="form-section">
           <form onSubmit={handleSubmit}>
             <div className="row g-4">
               <div className="col-12">
-                <label>İstifadəçi adı</label>
+                <label>Username</label>
                 <input
                   ref={emailRef}
                   type="text"
                   id="email"
-                  placeholder="İstifadəçi adı"
+                  placeholder="Username"
                   required
                 />
               </div>
               <div className="col-12">
-                <label>Şifrə</label>
+                <label>Password</label>
                 <input
                   ref={passwordRef}
                   type="password"
                   id="password"
-                  placeholder="Şifrə"
+                  placeholder="Password"
                   required
                 />
               </div>
               <div className="col-12">
-                <button type="submit">Daxil ol </button>
+                <button type="submit">Login</button>
               </div>
             </div>
           </form>

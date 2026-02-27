@@ -15,8 +15,8 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="dashboard-content">
         <div className="welcome-section">
-          <h2>Xoş gəlmisiniz, Admin! 🎉</h2>
-          <p>Admin panelinə uğurla daxil oldunuz.</p>
+          <h2>Welcom to the admin panel, Admin! 🎉</h2>
+          <p>You have successfully logged in to the admin panel, Admin! 🎉</p>
         </div>
       </div>
     </div>
