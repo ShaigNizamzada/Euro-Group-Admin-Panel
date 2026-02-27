@@ -164,8 +164,7 @@ const Categories = () => {
         error
       );
       alert(
-        `Kateqoriya ${
-          isEditMode ? "yenilənmədi" : "əlavə edilmədi"
+        `Kateqoriya ${isEditMode ? "yenilənmədi" : "əlavə edilmədi"
         }. Xəta baş verdi.`
       );
     }

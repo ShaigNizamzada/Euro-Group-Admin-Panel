@@ -10,58 +10,44 @@ const Partners = () => {
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-
-  const [categories, setCategories] = useState(null);
+  const [partners, setPartners] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingPartner, setEditingPartner] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
-    name_az: "",
-    name_ru: "",
-    image: null,
+    logo: null,
   });
 
-  const fetchCategories = async () => {
+
+  const fetchPartners = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/categories`,
+        `${import.meta.env.VITE_API_URL}/api/admin/partners`,
         { headers }
       );
-      setCategories(response?.data?.data || response?.data || []);
+      setPartners(response?.data?.data || response?.data || []);
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      setCategories([]);
+      console.error("Failed to fetch partners:", error);
+      setPartners([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch categories
   useEffect(() => {
-    fetchCategories();
+    fetchPartners();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Input change handler
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // Image file handler
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        image: file,
+        logo: file,
       }));
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -69,69 +55,59 @@ const Partners = () => {
       reader.readAsDataURL(file);
     }
   };
-
-  // Remove image
   const handleRemoveImage = () => {
     setFormData((prev) => ({
       ...prev,
-      image: null,
+      logo: null,
     }));
     setImagePreview(null);
   };
 
-  // Modal close
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setEditingCategory(null);
+    setEditingPartner(null);
     setImagePreview(null);
-    setFormData({
-      name_az: "",
-      name_ru: "",
-      image: null,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      logo: null,
+    }));
   };
 
   // Open add modal
   const openAddModal = () => {
-    setEditingCategory(null);
+    setEditingPartner(null);
     setImagePreview(null);
-    setFormData({
-      name_az: "",
-      name_ru: "",
-      image: null,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      logo: null,
+    }));
     setIsModalOpen(true);
   };
 
-  // Open edit modal
-  const openEditModal = (category) => {
-    setEditingCategory(category);
-    setFormData({
-      name_az: category?.name?.az || "",
-      name_ru: category?.name?.ru || "",
-      image: null,
-    });
-    // Set existing image as preview
-    if (category?.imgSrc) {
-      setImagePreview(`${import.meta.env.VITE_API_URL}${category.imgSrc}`);
+  const openEditModal = (partner) => {
+    setEditingPartner(partner);
+    setFormData((prev) => ({
+      ...prev,
+      logo: null,
+    }));
+    if (partner?.logoSrc) {
+      setImagePreview(`${import.meta.env.VITE_API_URL}${partner.logoSrc}`);
     } else {
       setImagePreview(null);
     }
     setIsModalOpen(true);
   };
 
-  // Submit category (POST/PUT)
-  const handleSubmitCategory = async (e) => {
+  const handleSubmitPartner = async (e) => {
     e.preventDefault();
-    const isEditMode = Boolean(editingCategory?.id);
-    const categoryId = editingCategory?.id;
+    const isEditMode = Boolean(editingPartner?.id);
+    const partnerId = editingPartner?.id;
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name_az", formData.name_az);
-      formDataToSend.append("name_ru", formData.name_ru);
-      if (formData.image) {
-        formDataToSend.append("image", formData.image);
+
+      if (formData.logo) {
+        formDataToSend.append("logo", formData.logo);
       }
 
       const config = {
@@ -142,25 +118,23 @@ const Partners = () => {
       };
 
       if (isEditMode) {
-        await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/categories/${categoryId}`,
+        await axios.patch(
+          `${import.meta.env.VITE_API_URL}/api/admin/partners/${partnerId}`,
           formDataToSend,
           config
         );
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/categories`,
+          `${import.meta.env.VITE_API_URL}/api/admin/partners`,
           formDataToSend,
           config
         );
       }
-
-      // Refresh categories list
-      await fetchCategories();
+      await fetchPartners();
       handleModalClose();
     } catch (error) {
       console.error(
-        `Failed to ${isEditMode ? "update" : "create"} category:`,
+        `Failed to ${isEditMode ? "update" : "create"} partner:`,
         error
       );
       alert(
@@ -175,13 +149,13 @@ const Partners = () => {
     if (!window.confirm("Silməyə əminsiniz?")) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/categories/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/partners/${id}`,
         { headers }
       );
-      setCategories((prev) => prev.filter((category) => category.id !== id));
+      setPartners((prev) => prev.filter((partner) => partner.id !== id));
     } catch (error) {
-      console.error("Failed to delete category:", error);
-      alert("Kateqoriya silinmədi. Xəta baş verdi.");
+      console.error("Failed to delete partner:", error);
+      alert("Partner silinmədi. Xəta baş verdi.");
     }
   };
 
@@ -204,8 +178,7 @@ const Partners = () => {
             <tr>
               <th>ID</th>
               <th>Şəkil</th>
-              <th>Ad (AZ)</th>
-              <th>Ad (RU)</th>
+
               <th>Əməliyyatlar</th>
             </tr>
           </thead>
@@ -216,34 +189,32 @@ const Partners = () => {
                   <LoadingSpinner />
                 </td>
               </tr>
-            ) : categories && categories.length > 0 ? (
-              categories.map((category, index) => (
-                <tr key={category.id}>
+            ) : partners && partners.length > 0 ? (
+              partners.map((partner, index) => (
+                <tr key={partner.id}>
                   <td>{index + 1}</td>
                   <td>
-                    {category.imgSrc ? (
+                    {partner.logoSrc ? (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${category.imgSrc}`}
-                        alt={category.name?.az || "Partner"}
+                        src={`${import.meta.env.VITE_API_URL}${partner.logoSrc}`}
+                        alt={partner.id || "Partner"}
                         className="partner-image"
                       />
                     ) : (
                       <span className="no-image">Şəkil yoxdur</span>
                     )}
                   </td>
-                  <td>{category.name?.az || "-"}</td>
-                  <td>{category.name?.ru || "-"}</td>
                   <td>
                     <div className="d-flex gap-2">
                       <button
                         className="btn btn-outline-dark"
-                        onClick={() => openEditModal(category)}
+                        onClick={() => openEditModal(partner)}
                       >
                         Redaktə et
                       </button>
                       <button
                         className="btn btn-danger"
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => handleDelete(partner.id)}
                       >
                         Sil
                       </button>
@@ -267,7 +238,7 @@ const Partners = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {editingCategory
+                {editingPartner
                   ? "Partnerni Dəyişdir"
                   : "Yeni Partner"}
               </h2>
@@ -275,49 +246,22 @@ const Partners = () => {
                 &times;
               </button>
             </div>
-            <form className="modal-body" onSubmit={handleSubmitCategory}>
-              <div className="form-group">
-                <label htmlFor="name_az">Ad (Azərbaycan)</label>
-                <input
-                  id="name_az"
-                  name="name_az"
-                  type="text"
-                  value={formData.name_az}
-                  onChange={handleInputChange}
-                  placeholder="Partner adı (AZ)"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="name_ru">Ad (Русский)</label>
-                <input
-                  id="name_ru"
-                  name="name_ru"
-                  type="text"
-                  value={formData.name_ru}
-                  onChange={handleInputChange}
-                  placeholder="Название партнера (RU)"
-                  required
-                />
-              </div>
-
+            <form className="modal-body" onSubmit={handleSubmitPartner}>
               <div className="form-group">
                 <label>Şəkil</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
-                    id="image"
-                    name="image"
-                    accept="image/*"
+                    id="logo"
+                    name="logo"
                     onChange={handleImageChange}
                     className="file-input"
                   />
-                  <label htmlFor="image" className="file-upload-label">
+                  <label htmlFor="logo" className="file-upload-label">
                     <i className="upload-icon">📁</i>
                     <span>
-                      {formData.image
-                        ? formData.image.name
+                      {formData.logo
+                        ? formData.logo.name
                         : "Şəkil seçin (klik edin)"}
                     </span>
                   </label>
@@ -341,7 +285,7 @@ const Partners = () => {
                   İmtina
                 </button>
                 <button type="submit" className="primary">
-                  {editingCategory ? "Dəyişdir" : "Əlavə et"}
+                  {editingPartner ? "Dəyişdir" : "Əlavə et"}
                 </button>
               </div>
             </form>
