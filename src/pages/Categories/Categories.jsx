@@ -106,7 +106,6 @@ const Categories = () => {
     });
   };
 
-  // Open add modal
   const openAddModal = () => {
     setEditingCategory(null);
     setImagePreview(null);
@@ -120,7 +119,6 @@ const Categories = () => {
     setIsModalOpen(true);
   };
 
-  // Open edit modal
   const openEditModal = (category) => {
     setEditingCategory(category);
     setFormData({
@@ -129,7 +127,6 @@ const Categories = () => {
       image: null,
       icon: null,
     });
-    // Set existing image as preview
     if (category?.image) {
       setImagePreview(`${import.meta.env.VITE_API_URL}${category.image}`);
     } else {
@@ -183,15 +180,15 @@ const Categories = () => {
         error
       );
       alert(
-        `Kateqoriya ${isEditMode ? "yenilənmədi" : "əlavə edilmədi"
-        }. Xəta baş verdi.`
+        `Category ${isEditMode ? "updated" : "created"
+        }. Error occurred.`
       );
     }
   };
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm("Silməyə əminsiniz?")) return;
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/categories/${id}`,
@@ -200,7 +197,7 @@ const Categories = () => {
       setCategories((prev) => prev.filter((category) => category.id !== id));
     } catch (error) {
       console.error("Failed to delete category:", error);
-      alert("Kateqoriya silinmədi. Xəta baş verdi.");
+      alert("Category not deleted. Error occurred.");
     }
   };
 
@@ -208,11 +205,11 @@ const Categories = () => {
     <div className="categories-page-section">
       <div className="top-section">
         <div className="title-section">
-          <h1>Kateqoriyalar</h1>
+          <h1>Categories</h1>
         </div>
         <div className="button-section">
           <button className="addition-button" onClick={openAddModal}>
-            + Əlavə et
+            + Add
           </button>
         </div>
       </div>
@@ -222,11 +219,11 @@ const Categories = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Şəkil</th>
+              <th>Image</th>
               <th>Icon</th>
-              <th>Ad (En)</th>
-              <th>Ad (Es)</th>
-              <th>Əməliyyatlar</th>
+              <th>Name (En)</th>
+              <th>Name (Es)</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -248,7 +245,7 @@ const Categories = () => {
                         className="category-image"
                       />
                     ) : (
-                      <span className="no-image">Şəkil yoxdur</span>
+                      <span className="no-image">Image not found</span>
                     )}
                   </td>
                   <td>
@@ -270,13 +267,13 @@ const Categories = () => {
                         className="btn btn-outline-dark"
                         onClick={() => openEditModal(category)}
                       >
-                        Redaktə et
+                        Edit
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={() => handleDelete(category.id)}
                       >
-                        Sil
+                        Delete
                       </button>
                     </div>
                   </td>
@@ -285,7 +282,7 @@ const Categories = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="no-data-cell">
-                  Kateqoriya tapılmadı
+                  Category not found
                 </td>
               </tr>
             )}
@@ -299,8 +296,8 @@ const Categories = () => {
             <div className="modal-header">
               <h2>
                 {editingCategory
-                  ? "Kateqoriyanı Dəyişdir"
-                  : "Yeni Kateqoriya"}
+                  ? "Edit Category"
+                  : "New Category"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -334,7 +331,7 @@ const Categories = () => {
               </div>
 
               <div className="form-group">
-                <label>Şəkil</label>
+                <label>Image</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -349,7 +346,7 @@ const Categories = () => {
                     <span>
                       {formData.image
                         ? formData.image.name
-                        : "Şəkil seçin (klik edin)"}
+                        : "Image select (click)"}
                     </span>
                   </label>
                   {imagePreview && (
@@ -382,7 +379,7 @@ const Categories = () => {
                     <span>
                       {formData.icon
                         ? formData.icon.name
-                        : "Şəkil seçin (klik edin)"}
+                        : "Image select (click)"}
                     </span>
                   </label>
                   {iconPreview && (
@@ -402,10 +399,10 @@ const Categories = () => {
 
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
-                  İmtina
+                  Cancel
                 </button>
                 <button type="submit" className="primary">
-                  {editingCategory ? "Dəyişdir" : "Əlavə et"}
+                  {editingCategory ? "Edit" : "Add"}
                 </button>
               </div>
             </form>

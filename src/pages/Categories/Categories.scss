@@ -126,9 +126,10 @@
             }
         }
 
-        .category-image {
-            max-width: 60px;
-            max-height: 60px;
+        .category-image,
+        .category-icon {
+            max-width: 320px;
+            max-height: 320px;
             height: auto;
             border-radius: 4px;
             object-fit: cover;
