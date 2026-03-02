@@ -21,7 +21,7 @@ const Orders = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/orders`,
+        `${import.meta.env.VITE_API_URL}/api/admin/orders?limit=99999`,
         { headers }
       );
       setOrders(response?.data?.data || response?.data || []);
@@ -205,12 +205,12 @@ const Orders = () => {
                     <h3>İnvoys Məlumatları</h3>
                     <div className="detail-row">
                       <span className="detail-label">İnvoys ID:</span>
-                      <span className="detail-value">{selectedOrder.invoiceID || "-"}</span>
+                      <span className="detail-value">{selectedOrder.redsys_order || "-"}</span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Tarix:</span>
                       <span className="detail-value">
-                        {formatDateForModal(selectedOrder.createdAt)}
+                        {formatDateForModal(selectedOrder.created_at)}
                       </span>
                     </div>
                   </div>
@@ -220,75 +220,51 @@ const Orders = () => {
                     <div className="detail-row">
                       <span className="detail-label">Ad:</span>
                       <span className="detail-value">
-                        {selectedOrder.user?.firstName || "-"}
+                        {selectedOrder.user_name || "-"}
                       </span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Soyad:</span>
-                      <span className="detail-value">
-                        {selectedOrder.user?.lastName || "-"}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">İstifadəçi adı:</span>
-                      <span className="detail-value">
-                        {selectedOrder.user?.username || "-"}
-                      </span>
-                    </div>
+
                     <div className="detail-row">
                       <span className="detail-label">E-mail:</span>
                       <span className="detail-value">
-                        {selectedOrder.user?.email || "-"}
+                        {selectedOrder.user_email || "-"}
                       </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Telefon:</span>
                       <span className="detail-value">
-                        {selectedOrder.user?.phone || "-"}
+                        {selectedOrder.user_phone || "-"}
                       </span>
                     </div>
                   </div>
 
                   <div className="order-detail-section">
                     <h3>Məhsullar</h3>
-                    {selectedOrder.products && selectedOrder.products.length > 0 ? (
+                    {selectedOrder.items && selectedOrder.items.length > 0 ? (
                       <div className="products-list">
-                        {selectedOrder.products.map((product, index) => (
+                        {selectedOrder.items.map((item, index) => (
                           <div key={index} className="product-item">
-                            <div className="product-image">
-                              {product.productImage ? (
-                                <img
-                                  src={`${import.meta.env.VITE_API_URL}${product.productImage}`}
-                                  alt={product.productTitle?.az || "Məhsul"}
-                                  onError={(e) => {
-                                    e.target.src = "/placeholder-image.png";
-                                  }}
-                                />
-                              ) : (
-                                <div className="no-image">Şəkil yoxdur</div>
-                              )}
-                            </div>
                             <div className="product-details">
                               <div className="detail-row">
                                 <span className="detail-label">Başlıq (AZ):</span>
                                 <span className="detail-value">
-                                  {product.productTitle?.az || "-"}
+                                  {item?.title_en || "-"}
                                 </span>
                               </div>
                               <div className="detail-row">
                                 <span className="detail-label">Başlıq (EN):</span>
                                 <span className="detail-value">
-                                  {product.productTitle?.en || product.productTitle?.ru || "-"}
+                                  {item?.title_es || "-"}
                                 </span>
                               </div>
                               <div className="detail-row">
                                 <span className="detail-label">Say:</span>
-                                <span className="detail-value">{product.say || "-"}</span>
+                                <span className="detail-value">{item?.quantity || "-"}</span>
                               </div>
                               <div className="detail-row">
                                 <span className="detail-label">Qiymət:</span>
                                 <span className="detail-value">
-                                  {formatCurrency(product.qiymet || 0)}
+                                  {formatCurrency(item?.price_at_order || 0)}
                                 </span>
                               </div>
                             </div>
