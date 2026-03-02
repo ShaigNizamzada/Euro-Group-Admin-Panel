@@ -180,7 +180,7 @@ const Categories = () => {
         error
       );
       alert(
-        `Category ${isEditMode ? "updated" : "created"
+        `Kateqoriya ${isEditMode ? "yeniləndi" : "əlavə edildi"
         }. Error occurred.`
       );
     }
@@ -188,7 +188,7 @@ const Categories = () => {
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    if (!window.confirm("Bu kateqoriyani silmək istədiyinizdən əminsiniz?")) return;
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/categories/${id}`,
@@ -197,7 +197,7 @@ const Categories = () => {
       setCategories((prev) => prev.filter((category) => category.id !== id));
     } catch (error) {
       console.error("Failed to delete category:", error);
-      alert("Category not deleted. Error occurred.");
+      alert("Kateqoriya silinmedi. Xəta baş verdi.");
     }
   };
 
@@ -205,11 +205,11 @@ const Categories = () => {
     <div className="categories-page-section">
       <div className="top-section">
         <div className="title-section">
-          <h1>Categories</h1>
+          <h1>Kateqoriyalar</h1>
         </div>
         <div className="button-section">
           <button className="addition-button" onClick={openAddModal}>
-            + Add
+            + Əlavə et
           </button>
         </div>
       </div>
@@ -219,11 +219,11 @@ const Categories = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Image</th>
-              <th>Icon</th>
-              <th>Name (En)</th>
-              <th>Name (Es)</th>
-              <th>Actions</th>
+              <th>Şəkil</th>
+              <th>Ikon</th>
+              <th>Ad (EN)</th>
+              <th>Ad (ES)</th>
+              <th>Əməliyyatlar</th>
             </tr>
           </thead>
           <tbody>
@@ -245,7 +245,7 @@ const Categories = () => {
                         className="category-image"
                       />
                     ) : (
-                      <span className="no-image">Image not found</span>
+                      <span className="no-image">Şəkil yoxdur</span>
                     )}
                   </td>
                   <td>
@@ -256,7 +256,7 @@ const Categories = () => {
                         className="category-icon"
                       />
                     ) : (
-                      <span className="no-icon">Icon yoxdur</span>
+                      <span className="no-icon">Ikon yoxdur</span>
                     )}
                   </td>
                   <td>{category.name?.en || "-"}</td>
@@ -267,13 +267,13 @@ const Categories = () => {
                         className="btn btn-outline-dark"
                         onClick={() => openEditModal(category)}
                       >
-                        Edit
+                        Redaktə et
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={() => handleDelete(category.id)}
                       >
-                        Delete
+                        Sil
                       </button>
                     </div>
                   </td>
@@ -282,7 +282,7 @@ const Categories = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="no-data-cell">
-                  Category not found
+                  Kateqoriya tapılmadı
                 </td>
               </tr>
             )}
@@ -296,8 +296,8 @@ const Categories = () => {
             <div className="modal-header">
               <h2>
                 {editingCategory
-                  ? "Edit Category"
-                  : "New Category"}
+                  ? "Kateqoriya - Redaktə et"
+                  : "Kateqoriya - Əlavə et"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -305,33 +305,33 @@ const Categories = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitCategory}>
               <div className="form-group">
-                <label htmlFor="name_en">Category name (English)</label>
+                <label htmlFor="name_en">Kateqoriya adı (English)</label>
                 <input
                   id="name_en"
                   name="name_en"
                   type="text"
                   value={formData.name_en}
                   onChange={handleInputChange}
-                  placeholder="Category name (EN)"
+                  placeholder="Kateqoriya adı (EN)"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="name_es">Category name (Spanish)</label>
+                <label htmlFor="name_es">Kateqoriya adı (Spanish)</label>
                 <input
                   id="name_es"
                   name="name_es"
                   type="text"
                   value={formData.name_es}
                   onChange={handleInputChange}
-                  placeholder="Category name (ES)"
+                  placeholder="Kateqoriya adı (ES)"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Image</label>
+                <label>Şəkil</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -346,7 +346,7 @@ const Categories = () => {
                     <span>
                       {formData.image
                         ? formData.image.name
-                        : "Image select (click)"}
+                        : "Şəkil seç (klikləyin)"}
                     </span>
                   </label>
                   {imagePreview && (
@@ -364,7 +364,7 @@ const Categories = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Icon</label>
+                <label>Ikon</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -379,7 +379,7 @@ const Categories = () => {
                     <span>
                       {formData.icon
                         ? formData.icon.name
-                        : "Image select (click)"}
+                        : "Ikon seç (klikləyin)"}
                     </span>
                   </label>
                   {iconPreview && (
@@ -399,10 +399,10 @@ const Categories = () => {
 
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
-                  Cancel
+                  Ləğv et
                 </button>
                 <button type="submit" className="primary">
-                  {editingCategory ? "Edit" : "Add"}
+                  {editingCategory ? "Redaktə et" : "Əlavə et"}
                 </button>
               </div>
             </form>

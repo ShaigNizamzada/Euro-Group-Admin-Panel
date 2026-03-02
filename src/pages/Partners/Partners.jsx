@@ -138,7 +138,7 @@ const Partners = () => {
         error
       );
       alert(
-        `Partner ${isEditMode ? "updated" : "created"
+        `Partnyor ${isEditMode ? "yeniləndi" : "əlavə edildi"
         }. Error occurred.`
       );
     }
@@ -146,7 +146,7 @@ const Partners = () => {
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this partner?")) return;
+    if (!window.confirm("Bu partnyori silmək istədiyinizdən əminsiniz?")) return;
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/partners/${id}`,
@@ -155,7 +155,7 @@ const Partners = () => {
       setPartners((prev) => prev.filter((partner) => partner.id !== id));
     } catch (error) {
       console.error("Failed to delete partner:", error);
-      alert("Partner not deleted. Error occurred.");
+      alert("Partnyor silinmedi. Xəta baş verdi.");
     }
   };
 
@@ -163,11 +163,11 @@ const Partners = () => {
     <div className="partners-page-section">
       <div className="top-section">
         <div className="title-section">
-          <h1>Partners</h1>
+          <h1>Partnyorlar</h1>
         </div>
         <div className="button-section">
           <button className="addition-button" onClick={openAddModal}>
-            + Add
+            + Əlavə et
           </button>
         </div>
       </div>
@@ -177,8 +177,8 @@ const Partners = () => {
           <thead>
             <tr >
               <th>ID</th>
-              <th>Image</th>
-              <th>Actions</th>
+              <th>Şəkil</th>
+              <th>Əməliyyatlar</th>
             </tr>
           </thead>
           <tbody>
@@ -209,13 +209,13 @@ const Partners = () => {
                         className="btn btn-outline-dark"
                         onClick={() => openEditModal(partner)}
                       >
-                        Edit
+                        Redaktə et
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={() => handleDelete(partner.id)}
                       >
-                        Delete
+                        Sil
                       </button>
                     </div>
                   </td>
@@ -224,7 +224,7 @@ const Partners = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="no-data-cell">
-                  Partner not found
+                  Partnyor tapılmadı
                 </td>
               </tr>
             )}
@@ -238,8 +238,8 @@ const Partners = () => {
             <div className="modal-header">
               <h2>
                 {editingPartner
-                  ? "Edit Partner"
-                  : "New Partner"}
+                  ? "Partnyor - Redaktə et"
+                  : "Partnyor - Əlavə et"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -247,7 +247,7 @@ const Partners = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitPartner}>
               <div className="form-group">
-                <label>Image</label>
+                <label>Şəkil</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -261,7 +261,7 @@ const Partners = () => {
                     <span>
                       {formData.logo
                         ? formData.logo.name
-                        : "Image select (click)"}
+                        : "Şəkil seç (klikləyin)"}
                     </span>
                   </label>
                   {imagePreview && (
@@ -281,10 +281,10 @@ const Partners = () => {
 
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
-                  Cancel
+                  Ləğv et
                 </button>
                 <button type="submit" className="primary">
-                  {editingPartner ? "Edit" : "Add"}
+                  {editingPartner ? "Redaktə et" : "Əlavə et"}
                 </button>
               </div>
             </form>

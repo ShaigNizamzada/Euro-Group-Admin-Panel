@@ -150,11 +150,11 @@ const Brands = () => {
       handleModalClose();
     } catch (error) {
       console.error(
-        `Failed to ${isEditMode ? "update" : "create"} brand:`,
+        `Failed to ${isEditMode ? "yeniləmək" : "əlavə etmək"} brend:`,
         error
       );
       alert(
-        `Brand ${isEditMode ? "updated" : "created"
+        `Brend ${isEditMode ? "yeniləndi" : "əlavə edildi"
         }. Xəta baş verdi.`
       );
     }
@@ -162,7 +162,7 @@ const Brands = () => {
 
   // Delete brand
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this brand?")) return;
+    if (!window.confirm("Bu brendi silmək istədiyinizdən əminsiniz?")) return;
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/brands/${id}`,
@@ -171,7 +171,7 @@ const Brands = () => {
       setBrands((prev) => prev.filter((brand) => brand.id !== id));
     } catch (error) {
       console.error("Failed to delete brand:", error);
-      alert("Brand not deleted. Error occurred.");
+      alert("Brend silinmedi. Xəta baş verdi.");
     }
   };
 
@@ -179,11 +179,11 @@ const Brands = () => {
     <div className="brands-page-section">
       <div className="top-section">
         <div className="title-section">
-          <h1>Brands</h1>
+          <h1>Brendlər</h1>
         </div>
         <div className="button-section">
           <button className="addition-button" onClick={openAddModal}>
-            + Add
+            + Əlavə et
           </button>
         </div>
       </div>
@@ -193,10 +193,10 @@ const Brands = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name (EN)</th>
-              <th>Name (ES)</th>
-              <th>Image</th>
-              <th>Actions</th>
+              <th>Ad (EN)</th>
+              <th>Ad (ES)</th>
+              <th>Şəkil</th>
+              <th>Əməliyyatlar</th>
             </tr>
           </thead>
           <tbody>
@@ -220,7 +220,7 @@ const Brands = () => {
                         className="brand-image"
                       />
                     ) : (
-                      <span className="no-image">Image not found</span>
+                      <span className="no-image">Şəkil yoxdur</span>
                     )}
                   </td>
                   <td>
@@ -244,7 +244,7 @@ const Brands = () => {
             ) : (
               <tr>
                 <td colSpan="4" className="no-data-cell">
-                  Brand not found
+                  Brend tapılmadı
                 </td>
               </tr>
             )}
@@ -258,8 +258,8 @@ const Brands = () => {
             <div className="modal-header">
               <h2>
                 {editingBrand
-                  ? "Brand Dəyişdir"
-                  : "New Brand"}
+                  ? "Brend - Redaktə et"
+                  : "Brend - Əlavə et"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -267,32 +267,32 @@ const Brands = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitBrand}>
               <div className="form-group">
-                <label htmlFor="name_en">Name (English)</label>
+                <label htmlFor="name_en">Brend adı (English)</label>
                 <input
                   id="name_en"
                   name="name_en"
                   type="text"
                   value={formData.name_en}
                   onChange={handleInputChange}
-                  placeholder="Brand name (EN)"
+                  placeholder="Brend adı (EN)"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="name_es">Name (Spanish)</label>
+                <label htmlFor="name_es">Brend adı (Spanish)</label>
                 <input
                   id="name_es"
                   name="name_es"
                   type="text"
                   value={formData.name_es}
                   onChange={handleInputChange}
-                  placeholder="Brand name (ES)"
+                  placeholder="Brend adı (ES)"
                   required
                 />
               </div>
               <div className="form-group">
-                <label>Image</label>
+                <label>Şəkil</label>
                 <div className="file-upload-wrapper">
                   <input
                     type="file"
@@ -306,7 +306,7 @@ const Brands = () => {
                     <span>
                       {formData.image
                         ? formData.image.name
-                        : "Image select (click)"}
+                        : "Şəkil seç (klikləyin)"}
                     </span>
                   </label>
                   {imagePreview && (
@@ -325,10 +325,11 @@ const Brands = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
-                  Cancel
+                  Ləğv et
                 </button>
                 <button type="submit" className="primary">
-                  {editingBrand ? "Edit" : "Add"}
+                  {editingBrand ? "Redaktə et" : "Əlavə et"}
+
                 </button>
               </div>
             </form>
