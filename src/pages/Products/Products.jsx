@@ -7,17 +7,20 @@ import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 const Products = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies?.token;
+
   const headers = {
     Authorization: `Bearer ${token}`,
   };
 
-  const [products, setProducts] = useState(null);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Form data
-  const [formData, setFormData] = useState({
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+
+  const initialFormState = {
     title_en: "",
     title_es: "",
     description_en: "",
@@ -27,18 +30,19 @@ const Products = () => {
     productCode: "",
     cost: "",
     weight: "",
-    is_active: "",
+    is_active: "1",
     categoryID: "",
     brandID: "",
     titleImage: null,
     images: [],
-  });
+  };
 
-  const [categories, setCategories] = useState(null);
-  const [brands, setBrands] = useState(null);
-  // Image previews
+  const [formData, setFormData] = useState(initialFormState);
+
   const [titleImagePreview, setTitleImagePreview] = useState(null);
   const [imagesPreview, setImagesPreview] = useState([]);
+
+  // ================= FETCH DATA =================
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -47,7 +51,7 @@ const Products = () => {
         `${import.meta.env.VITE_API_URL}/api/admin/products?limit=100`,
         { headers }
       );
-      setProducts(response?.data?.data || response?.data || []);
+      setProducts(response?.data?.data || []);
     } catch (error) {
       console.error("Failed to fetch products:", error);
       setProducts([]);
@@ -56,132 +60,105 @@ const Products = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const fetchCategories = async () => {
-    setIsLoading(true);
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/categories`,
         { headers }
       );
-      setCategories(response?.data?.data || response?.data || []);
+      setCategories(response?.data?.data || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       setCategories([]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const fetchBrands = async () => {
-    setIsLoading(true);
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/brands`,
         { headers }
       );
-      setBrands(response?.data?.data || response?.data || []);
+      setBrands(response?.data?.data || []);
     } catch (error) {
       console.error("Failed to fetch brands:", error);
       setBrands([]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    fetchProducts();
+    fetchCategories();
     fetchBrands();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle input change
+  // ================= FORM HANDLERS =================
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle title image
   const handleTitleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, titleImage: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => setTitleImagePreview(reader.result);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    setFormData((prev) => ({ ...prev, titleImage: file }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => setTitleImagePreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
-  // Handle multiple images
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files);
-    setFormData((prev) => ({ ...prev, images: [...prev.images, ...files] }));
+
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
 
     files.forEach((file) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = () =>
         setImagesPreview((prev) => [...prev, reader.result]);
-      };
       reader.readAsDataURL(file);
     });
   };
 
-  // Remove title image
   const removeTitleImage = () => {
     setFormData((prev) => ({ ...prev, titleImage: null }));
     setTitleImagePreview(null);
   };
 
-  // Remove additional image
   const removeImage = (index) => {
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+
     setImagesPreview((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Modal close
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
-    setFormData({
-      title_en: "",
-      title_es: "",
-      description_en: "",
-      description_es: "",
-      details_en: "",
-      details_es: "",
-      productCode: "",
-      cost: "",
-      weight: "",
-      is_active: "",
-      categoryID: "",
-      brandID: "",
-      titleImage: null,
-      images: [],
-    });
+    setFormData(initialFormState);
     setTitleImagePreview(null);
     setImagesPreview([]);
   };
 
-  // Open add modal
+  // ================= OPEN MODALS =================
+
   const openAddModal = () => {
     setEditingProduct(null);
+    setFormData(initialFormState);
     setIsModalOpen(true);
   };
 
-  // Open edit modal
   const openEditModal = (product) => {
     setEditingProduct(product);
+
     setFormData({
       title_en: product.title?.en || "",
       title_es: product.title?.es || "",
@@ -192,35 +169,38 @@ const Products = () => {
       productCode: product.productCode || "",
       cost: product.cost || "",
       weight: product.weight || "",
-      is_active: product.is_active || "",
-      categoryID: product.categoryID || "",
+      is_active: String(product.is_active ?? "1"),
+      categoryID: String(product.categoryID || ""),
+      brandID: String(product.brandID || ""), // FIX
       titleImage: null,
       images: [],
     });
-    setTitleImagePreview(product.titleImgSrc ? `${import.meta.env.VITE_API_URL}${product.titleImgSrc}` : null);
+
+    setTitleImagePreview(
+      product.titleImgSrc
+        ? `${import.meta.env.VITE_API_URL}${product.titleImgSrc}`
+        : null
+    );
+
     setIsModalOpen(true);
   };
 
-  // Submit product
+  // ================= SUBMIT =================
+
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
+
     const isEditMode = Boolean(editingProduct?.id);
     const productId = editingProduct?.id;
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("title_en", formData.title_en);
-      formDataToSend.append("title_es", formData.title_es);
-      formDataToSend.append("description_en", formData.description_en);
-      formDataToSend.append("description_es", formData.description_es);
-      formDataToSend.append("details_en", formData.details_en);
-      formDataToSend.append("details_es", formData.details_es);
-      formDataToSend.append("productCode", formData.productCode);
-      formDataToSend.append("cost", parseFloat(formData.cost));
-      formDataToSend.append("weight", parseFloat(formData.weight));
-      formDataToSend.append("is_active", formData.is_active);
-      formDataToSend.append("categoryID", parseInt(formData.categoryID));
-      formDataToSend.append("brandID", parseInt(formData.brandID));
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== "images" && key !== "titleImage") {
+          formDataToSend.append(key, value);
+        }
+      });
 
       if (formData.titleImage) {
         formDataToSend.append("titleImage", formData.titleImage);
@@ -251,25 +231,29 @@ const Products = () => {
         );
       }
 
+      await fetchProducts(); // REFRESH WITHOUT PAGE RELOAD
       handleModalClose();
     } catch (error) {
-      console.error(`Failed to ${isEditMode ? "update" : "create"} product:`, error);
-      alert(`Product ${isEditMode ? "updated" : "created"}. Error occurred.`);
+      console.error("Product submit error:", error);
+      alert("Əməliyyat uğursuz oldu.");
     }
   };
 
-  // Delete product
+  // ================= DELETE =================
+
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Silmək istədiyinizə əminsiniz?")) return;
+
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/products/${id}`,
         { headers }
       );
-      setProducts((prev) => prev.filter((product) => product.id !== id));
+
+      setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
-      console.error("Failed to delete product:", error);
-      alert("Product not deleted. Error occurred.");
+      console.error("Delete error:", error);
+      alert("Silinmədi.");
     }
   };
 
