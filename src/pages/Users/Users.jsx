@@ -10,32 +10,67 @@ const Users = () => {
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  
+
   const [users, setUsers] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    phone: "",
+    full_name: "",
     email: "",
-    username: "",
-    birthday: "",
-    role_id: "1",
+    phone: "",
+    roles: "",
+    company: "",
+    taxID: "",
+    location: "",
   });
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (pageParam = page) => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/users`,
+        `${import.meta.env.VITE_API_URL}/api/admin/users?page=${pageParam}&limit=${limit}`,
         { headers }
       );
-      setUsers(response?.data?.data || response?.data || []);
+      const data = response?.data;
+
+      setUsers(data?.data || data || []);
+
+      const pagination = data?.pagination;
+
+      if (pagination) {
+        setTotalItems(pagination.total || 0);
+
+        const backendLimit = pagination.limit || limit;
+
+        if (typeof pagination.page === "number" && pagination.page !== page) {
+          setPage(pagination.page);
+        }
+
+        const calculatedTotalPages =
+          pagination.total && backendLimit
+            ? Math.ceil(pagination.total / backendLimit)
+            : 1;
+
+        setTotalPages(calculatedTotalPages);
+      } else {
+        const length = Array.isArray(data?.data)
+          ? data.data.length
+          : Array.isArray(data)
+            ? data.length
+            : 0;
+        setTotalItems(length);
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error("Failed to fetch users:", error);
       setUsers([]);
+      setTotalItems(0);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
@@ -43,9 +78,9 @@ const Users = () => {
 
   // Users fetching
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page]);
 
   // Input change
   const handleInputChange = (e) => {
@@ -61,28 +96,27 @@ const Users = () => {
     setIsModalOpen(false);
     setEditingUser(null);
     setFormData({
-      first_name: "",
-      last_name: "",
-      phone: "",
+      full_name: "",
       email: "",
-      username: "",
-      birthday: "",
-      role_id: "1",
+      phone: "",
+      roles: "",
+      company: "",
+      taxID: "",
+      location: "",
     });
   };
 
   // Edit modal open
   const openEditModal = (user) => {
     setEditingUser(user);
-    const birthdayDate = user?.birthday ? new Date(user.birthday).toISOString().split('T')[0] : "";
     setFormData({
-      first_name: user?.first_name ?? "",
-      last_name: user?.last_name ?? "",
-      phone: user?.phone ?? "",
+      full_name: user?.full_name ?? "",
       email: user?.email ?? "",
-      username: user?.username ?? "",
-      birthday: birthdayDate,
-      role_id: user?.role_id?.toString() ?? "1",
+      phone: user?.phone ?? "",
+      roles: user?.roles.toString() ?? "",
+      company: user?.company ?? "",
+      taxID: user?.taxID ?? "",
+      location: user?.location ?? "",
     });
     setIsModalOpen(true);
   };
@@ -93,23 +127,23 @@ const Users = () => {
     const userId = editingUser?.id;
     try {
       const dataToSend = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone: formData.phone,
+        full_name: formData.full_name,
         email: formData.email,
-        username: formData.username,
-        birthday: formData.birthday,
-        role_id: parseInt(formData.role_id),
+        phone: formData.phone,
+        roles: parseInt(formData.roles),
+        company: formData.company,
+        taxID: formData.taxID,
+        location: formData.location,
       };
 
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/users/${userId}`,
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`,
         dataToSend,
         { headers }
       );
 
       // Refresh users list
-      await fetchUsers();
+      await fetchUsers(page);
       handleModalClose();
     } catch (error) {
       console.error("Failed to update user:", error);
@@ -122,14 +156,20 @@ const Users = () => {
     if (!window.confirm("İstifadəçini silməyə əminsiniz?")) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/users/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
         { headers }
       );
       setUsers((prev) => prev.filter((user) => user.id !== id));
+      setTotalItems((prev) => (prev > 0 ? prev - 1 : 0));
     } catch (error) {
       console.error("Failed to delete user:", error);
       alert("İstifadəçi silinmədi. Xəta baş verdi.");
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
   };
 
   // Format date
@@ -156,14 +196,16 @@ const Users = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Ad</th>
-              <th>Soyad</th>
-              <th>İstifadəçi adı</th>
+              <th>Tam Adı</th>
               <th>E-poçt</th>
               <th>Telefon</th>
-              <th>Doğum tarixi</th>
               <th>Rol</th>
+              <th>Şirkət</th>
+              <th>Tax id</th>
+              <th>Məkan</th>
               <th>Yaradılma tarixi</th>
+
+
               <th>Əməliyyatlar</th>
             </tr>
           </thead>
@@ -178,17 +220,17 @@ const Users = () => {
               users.map((user, index) => (
                 <tr key={user.id}>
                   <td>{index + 1}</td>
-                  <td>{user?.first_name || "-"}</td>
-                  <td>{user?.last_name || "-"}</td>
-                  <td>{user?.username || "-"}</td>
+                  <td>{user?.full_name || "-"}</td>
                   <td>{user?.email || "-"}</td>
                   <td>{user?.phone || "-"}</td>
-                  <td>{formatDate(user?.birthday)}</td>
                   <td>
                     <span className="role-badge">
-                      {user?.role_name || "-"}
+                      {user?.roles === 1 ? "Admin" : "User"}
                     </span>
                   </td>
+                  <td>{user?.company}</td>
+                  <td>{user?.taxID}</td>
+                  <td>{user?.location}</td>
                   <td>{formatDate(user?.created)}</td>
                   <td>
                     <div className="d-flex gap-2">
@@ -230,38 +272,14 @@ const Users = () => {
             </div>
             <form className="modal-body" onSubmit={handleSubmitUser}>
               <div className="form-group">
-                <label htmlFor="first_name">Ad</label>
+                <label htmlFor="full_name">Tam Ad</label>
                 <input
-                  id="first_name"
-                  name="first_name"
+                  id="full_name"
+                  name="full_name"
                   type="text"
-                  value={formData.first_name}
+                  value={formData.full_name}
                   onChange={handleInputChange}
-                  placeholder="Ad"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="last_name">Soyad</label>
-                <input
-                  id="last_name"
-                  name="last_name"
-                  type="text"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  placeholder="Soyad"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="username">İstifadəçi adı</label>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  placeholder="username"
+                  placeholder="Tam Ad"
                   required
                 />
               </div>
@@ -290,27 +308,53 @@ const Users = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="birthday">Doğum tarixi</label>
-                <input
-                  id="birthday"
-                  name="birthday"
-                  type="date"
-                  value={formData.birthday}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="role_id">Rol</label>
+                <label htmlFor="roles">Rol</label>
                 <select
-                  id="role_id"
-                  name="role_id"
-                  value={formData.role_id}
+                  id="roles"
+                  name="roles"
+                  value={formData.roles}
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="1">İstifadəçi</option>
-                  <option value="2">Admin</option>
+                  <option value="2">User</option>
+                  <option value="1">Admin</option>
                 </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="company">Şirkət</label>
+                <input
+                  id="company"
+                  name="company"
+                  type="text"
+                  value={formData.company}
+                  onChange={handleInputChange}
+                  placeholder="Şirkətin adı"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="taxID">Tax İd</label>
+                <input
+                  id="taxID"
+                  name="taxID"
+                  type="text"
+                  value={formData.taxID}
+                  onChange={handleInputChange}
+                  placeholder="Şirkətin adı"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="location">Məkan</label>
+                <input
+                  id="location"
+                  name="location"
+                  type="text"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="Məkan"
+                  required
+                />
               </div>
               <div className="modal-footer">
                 <button type="button" onClick={handleModalClose}>
@@ -322,6 +366,30 @@ const Users = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+      {!isLoading && totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="pagination-button"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+          >
+            ‹ Əvvəlki
+          </button>
+          <div className="pagination-info">
+            Səhifə {page} / {totalPages}
+            {totalItems > 0 && (
+              <span> · Toplam {totalItems} istifadəçi</span>
+            )}
+          </div>
+          <button
+            className="pagination-button"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+          >
+            Növbəti ›
+          </button>
         </div>
       )}
     </div>
