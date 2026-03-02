@@ -118,20 +118,6 @@
             }
         }
 
-        .invoice-cell {
-            font-family: monospace;
-            font-weight: 600;
-            color: #2c3e50;
-            background-color: #f0f4ff;
-            padding: 8px 12px;
-            border-radius: 4px;
-        }
-
-        .center-cell {
-            text-align: center;
-            font-weight: 600;
-        }
-
         .amount-cell {
             text-align: right;
             font-weight: 600;
@@ -402,10 +388,6 @@
                 font-size: 12px;
             }
 
-            .invoice-cell {
-                font-size: 11px;
-                padding: 6px 8px;
-            }
 
             .amount-cell {
                 font-size: 12px;

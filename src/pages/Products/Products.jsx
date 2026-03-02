@@ -20,6 +20,11 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
 
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const initialFormState = {
     title_en: "",
     title_es: "",
@@ -44,17 +49,43 @@ const Products = () => {
 
   // ================= FETCH DATA =================
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (pageParam = page) => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/products?limit=100`,
+        `${import.meta.env.VITE_API_URL}/api/admin/products?page=${pageParam}&limit=${limit}`,
         { headers }
       );
-      setProducts(response?.data?.data || []);
+      const data = response?.data;
+
+      setProducts(data?.data || []);
+
+      const pagination = data?.pagination;
+
+      if (pagination) {
+        setTotalItems(pagination.total || 0);
+
+        const backendLimit = pagination.limit || limit;
+
+        if (pagination.page && pagination.page !== page) {
+          setPage(pagination.page);
+        }
+
+        const calculatedTotalPages =
+          pagination.total && backendLimit
+            ? Math.ceil(pagination.total / backendLimit)
+            : 1;
+
+        setTotalPages(calculatedTotalPages);
+      } else {
+        setTotalItems(data?.data?.length || 0);
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error("Failed to fetch products:", error);
       setProducts([]);
+      setTotalItems(0);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +118,10 @@ const Products = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(page);
+  }, [page]);
+
+  useEffect(() => {
     fetchCategories();
     fetchBrands();
   }, []);
@@ -231,7 +265,7 @@ const Products = () => {
         );
       }
 
-      await fetchProducts(); // REFRESH WITHOUT PAGE RELOAD
+      await fetchProducts(page); // REFRESH WITHOUT PAGE RELOAD
       handleModalClose();
     } catch (error) {
       console.error("Product submit error:", error);
@@ -255,6 +289,11 @@ const Products = () => {
       console.error("Delete error:", error);
       alert("Silinmədi.");
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
   };
 
   return (
@@ -377,6 +416,31 @@ const Products = () => {
           </tbody>
         </table>
       </div>
+
+      {!isLoading && totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="pagination-button"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+          >
+            ‹ Əvvəlki
+          </button>
+          <div className="pagination-info">
+            Səhifə {page} / {totalPages}
+            {totalItems > 0 && (
+              <span> · Toplam {totalItems} məhsul</span>
+            )}
+          </div>
+          <button
+            className="pagination-button"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+          >
+            Növbəti ›
+          </button>
+        </div>
+      )}
 
 
 

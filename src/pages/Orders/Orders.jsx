@@ -16,7 +16,7 @@ const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(false);
-
+  const [currency, setCurrency] = useState("AZN");
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
@@ -25,6 +25,7 @@ const Orders = () => {
         { headers }
       );
       setOrders(response?.data?.data || response?.data || []);
+      setCurrency(response?.data?.data?.currency || "AZN");
     } catch (error) {
       console.error("Failed to fetch orders:", error);
       setOrders([]);
@@ -58,6 +59,7 @@ const Orders = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
+
     return date.toLocaleDateString("az-AZ", {
       year: "numeric",
       month: "2-digit",
@@ -69,7 +71,7 @@ const Orders = () => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    return `${amount} ₼`;
+    return `${amount} ${currency}`;
   };
 
   // Format date for modal (DD.MM.YYYY hour format)
@@ -126,12 +128,13 @@ const Orders = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>İnvoys ID</th>
-              <th>İstifadəçi</th>
-              <th>E-mail</th>
-              <th>Telefon</th>
-              <th>Məhsul sayı</th>
+              <th>Istifadəçi ID</th>
+              <th>İstifadəçi Email</th>
+              <th>İstifadəçi Adı</th>
+              <th>Sifariş Nömrəsi </th>
+              <th>Status</th>
               <th>Məbləğ</th>
+              <th>Valyuta</th>
               <th>Tarix</th>
               <th>Əməliyyatlar</th>
             </tr>
@@ -147,17 +150,14 @@ const Orders = () => {
               orders.map((order, index) => (
                 <tr key={order.id}>
                   <td>{index + 1}</td>
-                  <td className="invoice-cell">{order.invoiceID || "-"}</td>
-                  <td>
-                    {order.user
-                      ? `${order.user.firstName || ""} ${order.user.lastName || ""}`.trim() || "-"
-                      : "-"}
-                  </td>
-                  <td>{order.user?.email || "-"}</td>
-                  <td>{order.user?.phone || "-"}</td>
-                  <td className="center-cell">{order.productCount || 0}</td>
-                  <td className="amount-cell">{formatCurrency(order.total || 0)}</td>
-                  <td>{formatDate(order.createdAt)}</td>
+                  <td>{order.user_id || "-"}</td>
+                  <td>{order.user_email || "-"}</td>
+                  <td>{order.user_name || "-"}</td>
+                  <td>{order.order_number || "-"}</td>
+                  <td>{order.status || "-"}</td>
+                  <td>{formatCurrency(order.total || 0)}</td>
+                  <td>{order.currency || "-"}</td>
+                  <td>{formatDate(order.created_at)}</td>
                   <td>
                     <div className="d-flex gap-2">
                       <button
