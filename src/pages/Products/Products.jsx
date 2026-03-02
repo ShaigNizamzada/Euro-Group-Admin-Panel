@@ -34,8 +34,8 @@ const Products = () => {
     images: [],
   });
 
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState(null);
+  const [brands, setBrands] = useState(null);
   // Image previews
   const [titleImagePreview, setTitleImagePreview] = useState(null);
   const [imagesPreview, setImagesPreview] = useState([]);
@@ -44,7 +44,7 @@ const Products = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/products`,
+        `${import.meta.env.VITE_API_URL}/api/admin/products?limit=100`,
         { headers }
       );
       setProducts(response?.data?.data || response?.data || []);
@@ -58,6 +58,48 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchCategories = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/categories`,
+        { headers }
+      );
+      setCategories(response?.data?.data || response?.data || []);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      setCategories([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchBrands = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/brands`,
+        { headers }
+      );
+      setBrands(response?.data?.data || response?.data || []);
+    } catch (error) {
+      console.error("Failed to fetch brands:", error);
+      setBrands([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBrands();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -196,14 +238,14 @@ const Products = () => {
       };
 
       if (isEditMode) {
-        await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/products/${productId}`,
+        await axios.patch(
+          `${import.meta.env.VITE_API_URL}/api/admin/products/${productId}`,
           formDataToSend,
           config
         );
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/products`,
+          `${import.meta.env.VITE_API_URL}/api/admin/products`,
           formDataToSend,
           config
         );
@@ -221,7 +263,7 @@ const Products = () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/products/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/products/${id}`,
         { headers }
       );
       setProducts((prev) => prev.filter((product) => product.id !== id));
@@ -313,8 +355,8 @@ const Products = () => {
                   <td>{product.description?.es || "-"}</td>
                   <td>{product.details?.en || "-"}</td>
                   <td>{product.details?.es || "-"}</td>
-                  <td>{product.categoryID || "-"}</td>
-                  <td>{product.brandID || "-"}</td>
+                  <td>{product.categoryID ? categories?.find(category => category.id === product.categoryID)?.name?.en || "-" : "-"}</td>
+                  <td>{product.brandID ? brands?.find(brand => brand.id === product.brandID)?.name?.en || "-" : "-"}</td>
                   <td>{product.productCode || "-"}</td>
                   <td>{product.weight || "-"}</td>
                   <td>{product.cost || "-"}</td>
@@ -358,7 +400,7 @@ const Products = () => {
         <div className="modal-overlay" onClick={handleModalClose}>
           <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingProduct ? "Məhsulu Dəyişdir" : "Yeni Məhsul"}</h2>
+              <h2>{editingProduct ? "Məhsulu - Redaktə et" : "Məhsul - Əlavə et"}</h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
               </button>
@@ -366,55 +408,119 @@ const Products = () => {
             <form className="modal-body" onSubmit={handleSubmitProduct}>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="title_az">Başlıq (AZ) *</label>
+                  <label htmlFor="title_en">Başlıq (EN) *</label>
                   <input
-                    id="title_az"
-                    name="title_az"
+                    id="title_en"
+                    name="title_en"
                     type="text"
-                    value={formData.title_az}
+                    value={formData.title_en}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="title_ru">Başlıq (RU) *</label>
+                  <label htmlFor="title_es">Başlıq (ES) *</label>
                   <input
-                    id="title_ru"
-                    name="title_ru"
+                    id="title_es"
+                    name="title_es"
                     type="text"
-                    value={formData.title_ru}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="description_az">Təsvir (AZ) *</label>
-                  <textarea
-                    id="description_az"
-                    name="description_az"
-                    value={formData.description_az}
+                    value={formData.title_es}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="description_ru">Təsvir (RU) *</label>
-                  <textarea
-                    id="description_ru"
-                    name="description_ru"
-                    value={formData.description_ru}
+                  <label htmlFor="description_en">Təsvir (EN) *</label>
+                  <input
+                    id="description_en"
+                    name="description_en"
+                    type="text"
+                    value={formData.description_en}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-              </div>
-
-              <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="categoryID">Kateqoriya *</label>
+                  <label htmlFor="description_es">Təsvir (ES) *</label>
+                  <input
+                    id="description_es"
+                    name="description_es"
+                    type="text"
+                    value={formData.description_es}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="details_en">Ətraflı Məlumat (EN) *</label>
+                  <input
+                    id="details_en"
+                    name="details_en"
+                    type="text"
+                    value={formData.details_en}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="details_es">Ətraflı Məlumat (ES) *</label>
+                  <input
+                    id="details_es"
+                    name="details_es"
+                    type="text"
+                    value={formData.details_es}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productCode">Məhsul Kodu *</label>
+                  <input
+                    id="productCode"
+                    name="productCode"
+                    type="text"
+                    value={formData.productCode}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="weight">Çəki (kq) *</label>
+                  <input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cost">Qiymət *</label>
+                  <input
+                    id="cost"
+                    name="cost"
+                    type="number"
+                    value={formData.cost}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="is_active">Aktivlik *</label>
+                  <select
+                    id="is_active"
+                    name="is_active"
+                    value={formData.is_active}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="1">Aktiv</option>
+                    <option value="0">Deaktiv</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="categoryID">Kateqoriya (EN) *</label>
                   <select
                     id="categoryID"
                     name="categoryID"
@@ -422,86 +528,90 @@ const Products = () => {
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="">Kateqoriya seçin</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name?.az || cat.name}
-                      </option>
+                    <option value="">Kateqoriya (EN) seçin</option>
+                    {categories && categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name?.en || cat.name}</option>
                     ))}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="ceki">Çəki (kq) *</label>
-                  <input
-                    id="ceki"
-                    name="ceki"
-                    type="number"
-                    step="0.01"
-                    value={formData.ceki}
+                  <label htmlFor="brandID">Brend (EN) *</label>
+                  <select
+                    id="brandID"
+                    name="brandID"
+                    value={formData.brandID}
                     onChange={handleInputChange}
                     required
-                  />
+                  >
+                    <option value="">Brend (EN) seçin</option>
+                    {brands && brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>{brand.name?.en || brand.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="titleImage">Əsas Şəkil *</label>
+                  <div className="file-upload-wrapper">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleTitleImageChange}
+                      className="file-input"
+                      id="titleImage"
+                    />
+                    <label htmlFor="titleImage" className="file-upload-label">
+                      <i>📁</i>
+                      <span>Əsas şəkil seçin</span>
+                    </label>
+                    {titleImagePreview && (
+                      <div className="image-preview">
+                        <img src={titleImagePreview} alt="Preview" />
+                        <button
+                          type="button"
+                          className="remove-image"
+                          onClick={removeTitleImage}
+                        >
+                          <i>✕</i>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Əlavə Şəkillər</label>
+                  <div className="file-upload-wrapper">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImagesChange}
+                      className="file-input"
+                      id="images"
+                    />
+                    <label htmlFor="images" className="file-upload-label">
+                      <i>📁</i>
+                      <span>Əlavə şəkillər seçin (çoxlu)</span>
+                    </label>
+                    {imagesPreview.length > 0 && (
+                      <div className="images-preview-grid">
+                        {imagesPreview.map((preview, index) => (
+                          <div key={index} className="image-preview-item">
+                            <img src={preview} alt={`Preview ${index}`} />
+                            <button
+                              type="button"
+                              className="remove-image-small"
+                              onClick={() => removeImage(index)}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>Əsas Şəkil *</label>
-                <div className="file-upload-wrapper">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleTitleImageChange}
-                    className="file-input"
-                    id="titleImage"
-                  />
-                  <label htmlFor="titleImage" className="file-upload-label">
-                    <i>📁</i>
-                    <span>Əsas şəkil seçin</span>
-                  </label>
-                  {titleImagePreview && (
-                    <div className="image-preview">
-                      <img src={titleImagePreview} alt="Preview" />
-                      <button type="button" className="remove-image" onClick={removeTitleImage}>
-                        <i>✕</i>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Əlavə Şəkillər</label>
-                <div className="file-upload-wrapper">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImagesChange}
-                    className="file-input"
-                    id="images"
-                  />
-                  <label htmlFor="images" className="file-upload-label">
-                    <i>📁</i>
-                    <span>Əlavə şəkillər seçin (çoxlu)</span>
-                  </label>
-                  {imagesPreview.length > 0 && (
-                    <div className="images-preview-grid">
-                      {imagesPreview.map((preview, index) => (
-                        <div key={index} className="image-preview-item">
-                          <img src={preview} alt={`Preview ${index}`} />
-                          <button
-                            type="button"
-                            className="remove-image-small"
-                            onClick={() => removeImage(index)}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
 
 
               <div className="modal-footer">
