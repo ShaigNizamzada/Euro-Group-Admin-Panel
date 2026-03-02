@@ -13,13 +13,12 @@ const Settings = () => {
     const [settings, setSettings] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        phone_number: { az: "", ru: "" },
-        contact_email: { az: "", ru: "" },
-        contact_address: { az: "", ru: "" },
-        instagram: { az: "", ru: "" },
-        facebook: { az: "", ru: "" },
-        whatsapp: { az: "", ru: "" },
-        linkedin: { az: "", ru: "" },
+        contact_phone_number: { en: "", es: "" },
+        contact_email: { en: "", es: "" },
+        contact_address: { en: "", es: "" },
+        whatsapp: { en: "", es: "" },
+        instagram: { en: "", es: "" },
+        facebook: { en: "", es: "" },
     });
 
     // Fetch settings
@@ -27,40 +26,37 @@ const Settings = () => {
         const fetchSettings = async () => {
             try {
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/public/settings`,
+                    `${import.meta.env.VITE_API_URL}/api/settings`,
                 );
                 if (response.data.success && response.data.data) {
                     const data = response.data.data;
                     setSettings(data);
                     setFormData({
-                        phone_number: {
-                            az: data.phone_number?.az || "",
-                            ru: data.phone_number?.ru || "",
+                        contact_phone_number: {
+                            en: data.contact_phone_number?.en || "",
+                            es: data.contact_phone_number?.es || "",
                         },
                         contact_email: {
-                            az: data.contact_email?.az || "",
-                            ru: data.contact_email?.ru || "",
+                            en: data.contact_email?.en || "",
+                            es: data.contact_email?.es || "",
                         },
                         contact_address: {
-                            az: data.contact_address?.az || "",
-                            ru: data.contact_address?.ru || "",
-                        },
-                        instagram: {
-                            az: data.instagram?.az || "",
-                            ru: data.instagram?.ru || "",
-                        },
-                        facebook: {
-                            az: data.facebook?.az || "",
-                            ru: data.facebook?.ru || "",
+                            en: data.contact_address?.en || "",
+                            es: data.contact_address?.es || "",
                         },
                         whatsapp: {
-                            az: data.whatsapp?.az || "",
-                            ru: data.whatsapp?.ru || "",
+                            en: data.whatsapp?.en || "",
+                            es: data.whatsapp?.es || "",
                         },
-                        linkedin: {
-                            az: data.linkedin?.az || "",
-                            ru: data.linkedin?.ru || "",
+                        instagram: {
+                            en: data.instagram?.en || "",
+                            es: data.instagram?.es || "",
                         },
+                        facebook: {
+                            en: data.facebook?.en || "",
+                            es: data.facebook?.es || "",
+                        },
+                
                     });
                 }
             } catch (error) {
@@ -91,7 +87,7 @@ const Settings = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(
+            await axios.patch(
                 `${import.meta.env.VITE_API_URL}/api/public/settings`,
                 formData,
                 { headers }
@@ -104,34 +100,31 @@ const Settings = () => {
                 const updatedData = response.data.data;
                 setSettings(updatedData);
                 setFormData({
-                    phone_number: {
-                        az: updatedData.phone_number?.az || "",
-                        ru: updatedData.phone_number?.ru || "",
+                    contact_phone_number: {
+                        en: updatedData.contact_phone_number?.en || "",
+                        es: updatedData.contact_phone_number?.es || "",
                     },
                     contact_email: {
-                        az: updatedData.contact_email?.az || "",
-                        ru: updatedData.contact_email?.ru || "",
+                        en: updatedData.contact_email?.en || "",
+                        es: updatedData.contact_email?.es || "",
                     },
                     contact_address: {
-                        az: updatedData.contact_address?.az || "",
-                        ru: updatedData.contact_address?.ru || "",
-                    },
-                    instagram: {
-                        az: updatedData.instagram?.az || "",
-                        ru: updatedData.instagram?.ru || "",
-                    },
-                    facebook: {
-                        az: updatedData.facebook?.az || "",
-                        ru: updatedData.facebook?.ru || "",
+                        en: updatedData.contact_address?.en || "",
+                        es: updatedData.contact_address?.es || "",
                     },
                     whatsapp: {
-                        az: updatedData.whatsapp?.az || "",
-                        ru: updatedData.whatsapp?.ru || "",
+                        en: updatedData.whatsapp?.en || "",
+                        es: updatedData.whatsapp?.es || "",
                     },
-                    linkedin: {
-                        az: updatedData.linkedin?.az || "",
-                        ru: updatedData.linkedin?.ru || "",
+                    instagram: {
+                        en: updatedData.instagram?.en || "",
+                        es: updatedData.instagram?.es || "",
                     },
+                    facebook: {
+                        en: updatedData.facebook?.en || "",
+                        es: updatedData.facebook?.es || "",
+                    },
+             
                 });
             }
             setIsEditing(false);
@@ -144,34 +137,32 @@ const Settings = () => {
     const handleCancel = () => {
         if (settings) {
             setFormData({
-                phone_number: {
-                    az: settings.phone_number?.az || "",
-                    ru: settings.phone_number?.ru || "",
+                contact_phone_number: {
+                    en: settings.contact_phone_number?.en || "",
+                    es: settings.contact_phone_number?.es || "",
                 },
                 contact_email: {
-                    az: settings.contact_email?.az || "",
-                    ru: settings.contact_email?.ru || "",
+                    en: settings.contact_email?.en || "",
+                    es: settings.contact_email?.es || "",
                 },
                 contact_address: {
-                    az: settings.contact_address?.az || "",
-                    ru: settings.contact_address?.ru || "",
-                },
-                instagram: {
-                    az: settings.instagram?.az || "",
-                    ru: settings.instagram?.ru || "",
-                },
-                facebook: {
-                    az: settings.facebook?.az || "",
-                    ru: settings.facebook?.ru || "",
+                    en: settings.contact_address?.en || "",
+                    es: settings.contact_address?.es || "",
                 },
                 whatsapp: {
-                    az: settings.whatsapp?.az || "",
-                    ru: settings.whatsapp?.ru || "",
+                    en: settings.whatsapp?.en || "",
+                    es: settings.whatsapp?.es || "",
                 },
-                linkedin: {
-                    az: settings.linkedin?.az || "",
-                    ru: settings.linkedin?.ru || "",
+                instagram: {
+                    en: settings.instagram?.en || "",
+                    es: settings.instagram?.es || "",
                 },
+                facebook: {
+                    en: settings.facebook?.en || "",
+                    es: settings.facebook?.es || "",
+                },
+          
+            
             });
         }
         setIsEditing(false);
@@ -199,12 +190,12 @@ const Settings = () => {
             <div className="contact-form-container">
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="phone_number_az">Telefon Nömrəsi (AZ)</label>
+                        <label htmlFor="contact_phone_number_en">Telefon Nömrəsi (En)</label>
                         <input
-                            id="phone_number_az"
-                            name="phone_number_az"
+                            id="contact_phone_number_en"
+                            name="contact_phone_number_en"
                             type="text"
-                            value={formData.phone_number.az}
+                            value={formData.contact_phone_number.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -212,12 +203,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="phone_number_ru">Telefon Nömrəsi (RU)</label>
+                        <label htmlFor="contact_phone_number_es">Telefon Nömrəsi (Es)</label>
                         <input
-                            id="phone_number_ru"
-                            name="phone_number_ru"
+                            id="contact_phone_number_es"
+                            name="contact_phone_number_es"
                             type="text"
-                            value={formData.phone_number.ru}
+                            value={formData.contact_phone_number.es}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -225,12 +216,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="contact_email_az">Email (AZ)</label>
+                        <label htmlFor="contact_email_en">Email (En)</label>
                         <input
-                            id="contact_email_az"
-                            name="contact_email_az"
+                            id="contact_email_en"
+                            name="contact_email_en"
                             type="email"
-                            value={formData.contact_email.az}
+                            value={formData.contact_email.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -238,12 +229,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="contact_email_ru">Email (RU)</label>
+                        <label htmlFor="contact_email_es">Email (Es)</label>
                         <input
-                            id="contact_email_ru"
-                            name="contact_email_ru"
+                            id="contact_email_es"
+                            name="contact_email_es"
                             type="email"
-                            value={formData.contact_email.ru}
+                            value={formData.contact_email.es}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -251,12 +242,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="contact_address_az">Ünvan (AZ)</label>
+                        <label htmlFor="contact_address_en">Ünvan (En)</label>
                         <input
-                            id="contact_address_az"
-                            name="contact_address_az"
+                            id="contact_address_en"
+                            name="contact_address_en"
                             type="text"
-                            value={formData.contact_address.az}
+                            value={formData.contact_address.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -264,12 +255,24 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="contact_address_ru">Ünvan (RU)</label>
+                        <label htmlFor="contact_address_es">Ünvan (Es)</label>
                         <input
-                            id="contact_address_ru"
-                            name="contact_address_ru"
+                            id="contact_address_es"
+                            name="contact_address_es"
                             type="text"
-                            value={formData.contact_address.ru}
+                            value={formData.contact_address.es}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="whatsapp_en">WhatsApp (En)</label>
+                        <input
+                            id="whatsapp_en"
+                            name="whatsapp_en"
+                            type="text"
+                            value={formData.whatsapp.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -277,12 +280,24 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="instagram_az">Instagram (AZ)</label>
+                        <label htmlFor="whatsapp_es">WhatsApp (Es)</label>
                         <input
-                            id="instagram_az"
-                            name="instagram_az"
+                            id="whatsapp_es"
+                            name="whatsapp_es"
                             type="text"
-                            value={formData.instagram.az}
+                            value={formData.whatsapp.es}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="instagram_en">Instagram (En)</label>
+                        <input
+                            id="instagram_en"
+                            name="instagram_en"
+                            type="text"
+                            value={formData.instagram.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -290,12 +305,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="instagram_ru">Instagram (RU)</label>
+                        <label htmlFor="instagram_es">Instagram (Es)</label>
                         <input
-                            id="instagram_ru"
-                            name="instagram_ru"
+                            id="instagram_es"
+                            name="instagram_es"
                             type="text"
-                            value={formData.instagram.ru}
+                            value={formData.instagram.es}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -303,12 +318,12 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="facebook_az">Facebook (AZ)</label>
+                        <label htmlFor="facebook_en">Facebook (En)</label>
                         <input
-                            id="facebook_az"
-                            name="facebook_az"
+                            id="facebook_en"
+                            name="facebook_en"
                             type="text"
-                            value={formData.facebook.az}
+                            value={formData.facebook.en}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
@@ -316,70 +331,17 @@ const Settings = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="facebook_ru">Facebook (RU)</label>
+                        <label htmlFor="facebook_es">Facebook (Es)</label>
                         <input
-                            id="facebook_ru"
-                            name="facebook_ru"
+                            id="facebook_es"
+                            name="facebook_es"
                             type="text"
-                            value={formData.facebook.ru}
+                            value={formData.facebook.es}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                             required
                         />
                     </div>
-
-                    <div className="form-group">
-                        <label htmlFor="whatsapp_az">WhatsApp (AZ)</label>
-                        <input
-                            id="whatsapp_az"
-                            name="whatsapp_az"
-                            type="text"
-                            value={formData.whatsapp.az}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="whatsapp_ru">WhatsApp (RU)</label>
-                        <input
-                            id="whatsapp_ru"
-                            name="whatsapp_ru"
-                            type="text"
-                            value={formData.whatsapp.ru}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="linkedin_az">LinkedIn (AZ)</label>
-                        <input
-                            id="linkedin_az"
-                            name="linkedin_az"
-                            type="text"
-                            value={formData.linkedin.az}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="linkedin_ru">LinkedIn (RU)</label>
-                        <input
-                            id="linkedin_ru"
-                            name="linkedin_ru"
-                            type="text"
-                            value={formData.linkedin.ru}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                        />
-                    </div>
-
                     {isEditing && (
                         <div className="form-actions">
                             <button
