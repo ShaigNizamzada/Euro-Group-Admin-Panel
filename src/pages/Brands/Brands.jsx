@@ -27,7 +27,7 @@ const Brands = () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/brands`,
-        { headers }
+        { headers },
       );
       setBrands(response?.data?.data || response?.data || []);
     } catch (error) {
@@ -120,43 +120,40 @@ const Brands = () => {
     const brandId = editingBrand?.id;
 
     try {
-      const dataToSend = {
-        name_en: formData.name_en,
-        name_es: formData.name_es,
-        image: formData.image,
-      };
+      const form = new FormData();
+
+      form.append("name_en", formData.name_en);
+      form.append("name_es", formData.name_es);
+
+      // Əgər image varsa əlavə et
+      if (formData.image) {
+        form.append("image", formData.image);
+      }
 
       const config = {
-        headers,
-        "Content-Type": "multipart/form-data",
+        headers: {
+          ...headers,
+        },
       };
 
       if (isEditMode) {
         await axios.patch(
           `${import.meta.env.VITE_API_URL}/api/admin/brands/${brandId}`,
-          dataToSend,
-          config
+          form,
+          config,
         );
       } else {
         await axios.post(
           `${import.meta.env.VITE_API_URL}/api/admin/brands`,
-          dataToSend,
-          config
+          form,
+          config,
         );
       }
 
-      // Refresh brands list
       await fetchBrands();
       handleModalClose();
     } catch (error) {
-      console.error(
-        `Failed to ${isEditMode ? "yeniləmək" : "əlavə etmək"} brend:`,
-        error
-      );
-      alert(
-        `Brend ${isEditMode ? "yeniləndi" : "əlavə edildi"
-        }. Xəta baş verdi.`
-      );
+      console.error("Xəta:", error.response?.data || error);
     }
   };
 
@@ -166,7 +163,7 @@ const Brands = () => {
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/admin/brands/${id}`,
-        { headers }
+        { headers },
       );
       setBrands((prev) => prev.filter((brand) => brand.id !== id));
     } catch (error) {
@@ -257,9 +254,7 @@ const Brands = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {editingBrand
-                  ? "Brend - Redaktə et"
-                  : "Brend - Əlavə et"}
+                {editingBrand ? "Brend - Redaktə et" : "Brend - Əlavə et"}
               </h2>
               <button className="close-button" onClick={handleModalClose}>
                 &times;
@@ -329,7 +324,6 @@ const Brands = () => {
                 </button>
                 <button type="submit" className="primary">
                   {editingBrand ? "Redaktə et" : "Əlavə et"}
-
                 </button>
               </div>
             </form>
