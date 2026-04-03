@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./Products.scss";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
+import { Editor } from "primereact/editor";
 
 const Products = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies?.token;
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${token}`,
+    }),
+    [token]
+  );
 
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,49 +53,52 @@ const Products = () => {
 
   // ================= FETCH DATA =================
 
-  const fetchProducts = async (pageParam = page) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/products?page=${pageParam}&limit=${limit}`,
-        { headers }
-      );
-      const data = response?.data;
+  const fetchProducts = useCallback(
+    async (pageParam) => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/admin/products?page=${pageParam}&limit=${limit}`,
+          { headers }
+        );
+        const data = response?.data;
 
-      setProducts(data?.data || []);
+        setProducts(data?.data || []);
 
-      const pagination = data?.pagination;
+        const pagination = data?.pagination;
 
-      if (pagination) {
-        setTotalItems(pagination.total || 0);
+        if (pagination) {
+          setTotalItems(pagination.total || 0);
 
-        const backendLimit = pagination.limit || limit;
+          const backendLimit = pagination.limit || limit;
 
-        if (pagination.page && pagination.page !== page) {
-          setPage(pagination.page);
+          if (pagination.page && pagination.page !== page) {
+            setPage(pagination.page);
+          }
+
+          const calculatedTotalPages =
+            pagination.total && backendLimit
+              ? Math.ceil(pagination.total / backendLimit)
+              : 1;
+
+          setTotalPages(calculatedTotalPages);
+        } else {
+          setTotalItems(data?.data?.length || 0);
+          setTotalPages(1);
         }
-
-        const calculatedTotalPages =
-          pagination.total && backendLimit
-            ? Math.ceil(pagination.total / backendLimit)
-            : 1;
-
-        setTotalPages(calculatedTotalPages);
-      } else {
-        setTotalItems(data?.data?.length || 0);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        setProducts([]);
+        setTotalItems(0);
         setTotalPages(1);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      setProducts([]);
-      setTotalItems(0);
-      setTotalPages(1);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [headers, limit, page]
+  );
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/categories`,
@@ -102,9 +109,9 @@ const Products = () => {
       console.error("Failed to fetch categories:", error);
       setCategories([]);
     }
-  };
+  }, [headers]);
 
-  const fetchBrands = async () => {
+  const fetchBrands = useCallback(async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/brands`,
@@ -115,16 +122,16 @@ const Products = () => {
       console.error("Failed to fetch brands:", error);
       setBrands([]);
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
     fetchProducts(page);
-  }, [page]);
+  }, [fetchProducts, page]);
 
   useEffect(() => {
     fetchCategories();
     fetchBrands();
-  }, []);
+  }, [fetchBrands, fetchCategories]);
 
   // ================= FORM HANDLERS =================
 
@@ -223,6 +230,25 @@ const Products = () => {
 
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
+
+    const stripHtml = (value) =>
+      String(value ?? "").replace(/<[^>]*>/g, "").trim();
+
+    const editorRequired = [
+      { key: "description_en", label: "Təsvir (EN)" },
+      { key: "description_es", label: "Təsvir (ES)" },
+      { key: "details_en", label: "Ətraflı Məlumat (EN)" },
+      { key: "details_es", label: "Ətraflı Məlumat (ES)" },
+    ];
+
+    const missing = editorRequired
+      .filter(({ key }) => !stripHtml(formData[key]))
+      .map(({ label }) => label);
+
+    if (missing.length > 0) {
+      alert(`Zəhmət olmasa boş saxlamayın: ${missing.join(", ")}`);
+      return;
+    }
 
     const isEditMode = Boolean(editingProduct?.id);
     const productId = editingProduct?.id;
@@ -479,46 +505,58 @@ const Products = () => {
                 </div>
                 <div className="form-group">
                   <label htmlFor="description_en">Təsvir (EN) *</label>
-                  <input
+                  <Editor
                     id="description_en"
-                    name="description_en"
-                    type="text"
                     value={formData.description_en}
-                    onChange={handleInputChange}
-                    required
+                    onTextChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description_en: e.htmlValue || "",
+                      }))
+                    }
+                    style={{ height: "200px" }}
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="description_es">Təsvir (ES) *</label>
-                  <input
+                  <Editor
                     id="description_es"
-                    name="description_es"
-                    type="text"
                     value={formData.description_es}
-                    onChange={handleInputChange}
-                    required
+                    onTextChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description_es: e.htmlValue || "",
+                      }))
+                    }
+                    style={{ height: "200px" }}
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="details_en">Ətraflı Məlumat (EN) *</label>
-                  <input
+                  <Editor
                     id="details_en"
-                    name="details_en"
-                    type="text"
                     value={formData.details_en}
-                    onChange={handleInputChange}
-                    required
+                    onTextChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        details_en: e.htmlValue || "",
+                      }))
+                    }
+                    style={{ height: "250px" }}
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="details_es">Ətraflı Məlumat (ES) *</label>
-                  <input
+                  <Editor
                     id="details_es"
-                    name="details_es"
-                    type="text"
                     value={formData.details_es}
-                    onChange={handleInputChange}
-                    required
+                    onTextChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        details_es: e.htmlValue || "",
+                      }))
+                    }
+                    style={{ height: "250px" }}
                   />
                 </div>
                 <div className="form-group">
