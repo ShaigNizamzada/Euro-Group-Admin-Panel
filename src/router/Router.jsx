@@ -12,6 +12,7 @@ import Contacts from "../pages/Contacts/Contacts";
 import Users from "../pages/Users/Users";
 import Settings from "../pages/Settings/Settings";
 import Profile from "../pages/Profile/Profile";
+import SubCategories from "../pages/SubCategories/SubCategories";
 // Wrap component with MainLayout
 const WithLayout = ({ component: Component }) => {
   return (
@@ -60,7 +61,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />{" "}
-
+        <Route
+          path="/sub-categories"
+          element={
+            <ProtectedRoute>
+              <WithLayout component={SubCategories} />
+            </ProtectedRoute>
+          }
+        />{" "}
         <Route
           path="/brands"
           element={

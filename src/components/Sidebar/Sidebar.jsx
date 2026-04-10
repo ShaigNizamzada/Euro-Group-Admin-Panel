@@ -2,7 +2,7 @@ import React, { useContext, createContext } from "react";
 import BirsaytLogo from "../../assets/images/Logo.webp";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import "./_Sidebar.scss";
+import "./Sidebar.scss";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -97,6 +97,11 @@ const Sidebar = () => {
             <Link to="/categories" className="link" onClick={handleMenuItemClick}>
               <li className={isActive("/categories") ? "active" : ""}>
                 <i className="fa-solid fa-tags"></i> <span>Categories</span>
+              </li>
+            </Link>{" "}
+            <Link to="/sub-categories" className="link" onClick={handleMenuItemClick}>
+              <li className={isActive("/sub-categories") ? "active" : ""}>
+                <i className="fa-solid fa-sitemap"></i> <span>Sub Categories</span>
               </li>
             </Link>{" "}
             <Link to="/brands" className="link" onClick={handleMenuItemClick}>
