@@ -22,6 +22,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
 
   const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [brands, setBrands] = useState([]);
 
   const [page, setPage] = useState(1);
@@ -40,7 +41,7 @@ const Products = () => {
     cost: "",
     weight: "",
     is_active: "1",
-    categoryID: "",
+    subcategoryID: "",
     brandID: "",
     titleImage: null,
     images: [],
@@ -124,6 +125,19 @@ const Products = () => {
     }
   }, [headers]);
 
+  const fetchSubCategories = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/subcategories`,
+        { headers }
+      );
+      setSubCategories(response?.data?.data || []);
+    } catch (error) {
+      console.error("Failed to fetch subcategories:", error);
+      setSubCategories([]);
+    }
+  }, [headers]);
+
   useEffect(() => {
     fetchProducts(page);
   }, [fetchProducts, page]);
@@ -131,7 +145,8 @@ const Products = () => {
   useEffect(() => {
     fetchCategories();
     fetchBrands();
-  }, [fetchBrands, fetchCategories]);
+    fetchSubCategories();
+  }, [fetchBrands, fetchCategories, fetchSubCategories]);
 
   // ================= FORM HANDLERS =================
 
@@ -211,7 +226,7 @@ const Products = () => {
       cost: product.cost || "",
       weight: product.weight || "",
       is_active: String(product.is_active ?? "1"),
-      categoryID: String(product.categoryID || ""),
+      subcategoryID: String(product.subcategoryID || ""),
       brandID: String(product.brandID || ""), // FIX
       titleImage: null,
       images: [],
@@ -257,10 +272,19 @@ const Products = () => {
       const formDataToSend = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        if (key !== "images" && key !== "titleImage") {
+        if (key !== "images" && key !== "titleImage" && value !== "") {
           formDataToSend.append(key, value);
         }
       });
+
+      // Backend expects numeric IDs and flags as integers.
+      if (formData.subcategoryID) {
+        formDataToSend.set("subcategoryID", String(Number(formData.subcategoryID)));
+      }
+      if (formData.brandID) {
+        formDataToSend.set("brandID", String(Number(formData.brandID)));
+      }
+      formDataToSend.set("is_active", String(Number(formData.is_active)));
 
       if (formData.titleImage) {
         formDataToSend.append("titleImage", formData.titleImage);
@@ -606,17 +630,19 @@ const Products = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="categoryID">Kateqoriya (EN) *</label>
+                  <label htmlFor="subcategoryID">Alt Kateqoriya (EN) *</label>
                   <select
-                    id="categoryID"
-                    name="categoryID"
-                    value={formData.categoryID}
+                    id="subcategoryID"
+                    name="subcategoryID"
+                    value={formData.subcategoryID}
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="">Kateqoriya (EN) seçin</option>
-                    {categories && categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name?.en || cat.name}</option>
+                    <option value="">Alt kateqoriya (EN) seçin</option>
+                    {subCategories && subCategories.map((subCat) => (
+                      <option key={subCat.id} value={subCat.id}>
+                        {subCat.name?.en || subCat.name}
+                      </option>
                     ))}
                   </select>
                 </div>
