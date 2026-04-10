@@ -128,8 +128,8 @@
 
     .subcategory-image,
     .subcategory-icon {
-      max-width: 320px;
-      max-height: 320px;
+      max-width: 100px;
+      max-height: 100px;
       height: auto;
       border-radius: 4px;
       object-fit: cover;
@@ -197,6 +197,7 @@
     padding: 10px;
 
     .sub-categories-table {
+
       th,
       td {
         padding: 8px;
